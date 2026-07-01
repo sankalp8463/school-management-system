@@ -1,0 +1,59 @@
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  background-color: #333;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+.app-header h1 i {
+  margin-right: 10px;
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+}
+
+.app-sidebar {
+  width: 200px;
+  background-color: #f4f4f4;
+  padding: 1rem;
+}
+
+.app-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.app-sidebar li {
+  margin-bottom: 0.5rem;
+}
+
+.app-sidebar a {
+  text-decoration: none;
+  color: #333;
+  display: block;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.app-sidebar a i {
+  margin-right: 10px;
+}
+
+.app-sidebar a:hover,
+.app-sidebar a.active {
+  background-color: #ddd;
+}
+
+.app-content {
+  flex: 1;
+  padding: 1rem;
+}

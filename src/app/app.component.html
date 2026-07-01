@@ -1,0 +1,27 @@
+<div class="app-container">
+  <header class="app-header">
+    <h1><i class="fas fa-school"></i> School Management System</h1>
+  </header>
+  <div class="app-body">
+    <nav class="app-sidebar">
+      <ul>
+        <li><a routerLink="/dashboard" routerLinkActive="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a routerLink="/students" routerLinkActive="active"><i class="fas fa-user-graduate"></i> Students</a></li>
+        <li><a routerLink="/parents" routerLinkActive="active"><i class="fas fa-user-friends"></i> Parents</a></li>
+        <li><a routerLink="/employees" routerLinkActive="active"><i class="fas fa-users"></i> Employees</a></li>
+        <li><a routerLink="/classes" routerLinkActive="active"><i class="fas fa-chalkboard-teacher"></i> Classes</a></li>
+        <li><a routerLink="/subjects" routerLinkActive="active"><i class="fas fa-book"></i> Subjects</a></li>
+        <li><a routerLink="/attendance" routerLinkActive="active"><i class="fas fa-user-check"></i> Attendance</a></li>
+        <li><a routerLink="/assignments" routerLinkActive="active"><i class="fas fa-file-alt"></i> Assignments</a></li>
+        <li><a routerLink="/exams" routerLinkActive="active"><i class="fas fa-pen-alt"></i> Exams</a></li>
+        <li><a routerLink="/results" routerLinkActive="active"><i class="fas fa-poll"></i> Results</a></li>
+        <li><a routerLink="/fees" routerLinkActive="active"><i class="fas fa-money-bill-wave"></i> Fees</a></li>
+        <li><a routerLink="/transport" routerLinkActive="active"><i class="fas fa-bus"></i> Transport</a></li>
+        <li><a routerLink="/settings" routerLinkActive="active"><i class="fas fa-cog"></i> Settings</a></li>
+      </ul>
+    </nav>
+    <main class="app-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>
