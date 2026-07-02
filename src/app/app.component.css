@@ -9,7 +9,25 @@
   overflow: hidden;
   background: var(--color-bg);
 }
+.app__overlay{
 
+    display:none;
+
+    pointer-events:none;
+
+    opacity:0;
+
+}
+
+.app__overlay--visible{
+
+    display:block;
+
+    pointer-events:auto;
+
+    opacity:1;
+
+}
 .app--dark {
   --color-bg: #0F1117;
   --color-card: #171A23;

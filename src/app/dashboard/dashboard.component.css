@@ -10,7 +10,21 @@
   flex-direction: column;
   gap: 28px;
 }
+.menu-toggle,
+.hamburger,
+.mobile-menu-btn {
 
+    position: fixed;
+    top: 15px;
+    left: 15px;
+
+    z-index: 99999;
+
+    pointer-events: auto;
+
+    cursor: pointer;
+
+} 
 /* ── Header ── */
 .dashboard__header {
   display: flex;
