@@ -1,0 +1,131 @@
+<div class="page admissions-page" (click)="closeMenus()">
+  @if (toast()) {
+    <div class="toast">{{ toast() }}</div>
+  }
+
+  <div class="page__header">
+    <div class="page__header-left">
+      <div class="page__breadcrumb"><span>Home</span><span class="page__breadcrumb-sep">/</span><span class="page__breadcrumb-current">Admissions</span></div>
+      <h1 class="page__title">Admissions</h1>
+      <p class="page__subtitle">Enquiry pipeline, application review and admission analytics</p>
+    </div>
+    <div class="page__header-actions">
+      <button class="btn btn--secondary btn--sm" (click)="openImport(); $event.stopPropagation()">Import Leads</button>
+      <button class="btn btn--primary btn--sm" (click)="openNew(); $event.stopPropagation()">New Enquiry</button>
+    </div>
+  </div>
+
+  <div class="page__stats">
+    <div class="stat-card"><div class="stat-card__value">{{ stats().enquiries }}</div><div class="stat-card__label">Enquiries</div></div>
+    <div class="stat-card"><div class="stat-card__value">{{ stats().applications }}</div><div class="stat-card__label">Applications</div></div>
+    <div class="stat-card"><div class="stat-card__value">{{ stats().approved }}</div><div class="stat-card__label">Approved</div></div>
+    <div class="stat-card"><div class="stat-card__value">{{ stats().conversion }}%</div><div class="stat-card__label">Conversion</div></div>
+  </div>
+
+  <div class="page__toolbar">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input placeholder="Search applicant, parent or phone" [value]="searchQuery()" (input)="onSearch($any($event.target).value)">
+    </div>
+    <select class="filter-select" [value]="stageFilter()" (change)="onStageFilter($any($event.target).value)">
+      <option value="">All Stages</option>
+      @for (stage of stages; track stage) { <option [value]="stage">{{ stage }}</option> }
+    </select>
+    <select class="filter-select" [value]="sourceFilter()" (change)="onSourceFilter($any($event.target).value)">
+      <option value="">All Sources</option>
+      @for (source of sources; track source) { <option [value]="source">{{ source }}</option> }
+    </select>
+  </div>
+
+  <div class="module-shell">
+    <div class="table-card">
+      <div class="table-card__header"><div><div class="table-card__title">Admission Pipeline</div><div class="table-card__meta">{{ filtered().length }} applicants found</div></div></div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Applicant</th><th>Class</th><th>Parent</th><th>Source</th><th>Stage</th><th>Owner</th><th>Score</th><th></th></tr></thead>
+          <tbody>
+            @for (app of filtered(); track app.id) {
+              <tr>
+                <td><div class="cell-avatar"><div class="cell-avatar__img" style="background:#2463E9">{{ app.applicant.slice(0, 2).toUpperCase() }}</div><div><div class="cell-avatar__name">{{ app.applicant }}</div><div class="cell-avatar__sub">{{ app.phone }}</div></div></div></td>
+                <td>{{ app.className }}</td>
+                <td>{{ app.parent }}</td>
+                <td>{{ app.source }}</td>
+                <td><span class="badge" [ngClass]="getStageClass(app.stage)">{{ app.stage }}</span></td>
+                <td>{{ app.owner }}</td>
+                <td><div class="score-bar"><span [style.width.%]="app.score"></span></div></td>
+                <td>
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" (click)="toggleMenu(app.id, $event)">•••</button>
+                    @if (openMenuId() === app.id) {
+                      <div class="action-menu__dropdown">
+                        <button class="action-menu__item" (click)="advance(app)">Move Next Stage</button>
+                        <button class="action-menu__item" (click)="updateStage(app.id, 'Approved')">Approve</button>
+                        <button class="action-menu__item" (click)="updateStage(app.id, 'Rejected')">Reject</button>
+                        <div class="action-menu__divider"></div>
+                        <button class="action-menu__item action-menu__item--danger" (click)="deleteApplication(app.id)">Delete</button>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mobile-cards">
+        @for (app of filtered(); track app.id) {
+          <div class="mobile-card">
+            <div class="mobile-card__top">
+              <div class="cell-avatar"><div class="cell-avatar__img" style="background:#2463E9">{{ app.applicant.slice(0, 2).toUpperCase() }}</div><div><div class="cell-avatar__name">{{ app.applicant }}</div><div class="cell-avatar__sub">{{ app.className }} · {{ app.parent }}</div></div></div>
+              <span class="badge" [ngClass]="getStageClass(app.stage)">{{ app.stage }}</span>
+            </div>
+            <div class="mobile-card__row"><span class="mobile-card__key">Source</span><span class="mobile-card__val">{{ app.source }}</span></div>
+            <div class="mobile-card__row"><span class="mobile-card__key">Owner</span><span class="mobile-card__val">{{ app.owner }}</span></div>
+            <div class="mobile-card__actions"><button class="btn btn--secondary btn--sm" (click)="advance(app)">Next</button><button class="btn btn--primary btn--sm" (click)="updateStage(app.id, 'Approved')">Approve</button></div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="module-panel">
+      <div class="module-panel__title">Admission Analytics</div>
+      <div class="module-list" style="margin-top:14px">
+        <div class="module-list__item"><div class="module-list__icon">L</div><div><div class="module-list__title">Lead quality</div><div class="module-list__sub">Referral applicants convert fastest</div><div class="progress-line"><span style="width:72%"></span></div></div></div>
+        <div class="module-list__item"><div class="module-list__icon">D</div><div><div class="module-list__title">Document queue</div><div class="module-list__sub">Applicants waiting for verification</div></div><span class="badge badge--warning">Open</span></div>
+        <div class="module-list__item"><div class="module-list__icon">C</div><div><div class="module-list__title">Counselling calls</div><div class="module-list__sub">Follow-ups due this week</div></div><span class="badge badge--info">12</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (showNewModal()) {
+  <div class="modal-backdrop" (click)="closeNew()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+      <div class="modal__header"><span class="modal__title">New Admission Enquiry</span><button class="modal__close" (click)="closeNew()">×</button></div>
+      <div class="modal__body">
+        <div class="form-grid">
+          <div class="form-field"><label class="form-label">Applicant Name <span>*</span></label><input class="form-input" [value]="form().applicant||''" (input)="updateForm('applicant', $any($event.target).value)" placeholder="Student full name"></div>
+          <div class="form-field"><label class="form-label">Class</label><select class="form-select" [value]="form().className||'Class 1'" (change)="updateForm('className', $any($event.target).value)">@for (className of classes; track className) { <option [value]="className">{{ className }}</option> }</select></div>
+          <div class="form-field"><label class="form-label">Parent Name <span>*</span></label><input class="form-input" [value]="form().parent||''" (input)="updateForm('parent', $any($event.target).value)" placeholder="Parent / guardian"></div>
+          <div class="form-field"><label class="form-label">Phone</label><input class="form-input" [value]="form().phone||''" (input)="updateForm('phone', $any($event.target).value)" placeholder="98XXXXXXXX"></div>
+          <div class="form-field"><label class="form-label">Source</label><select class="form-select" [value]="form().source||'Website'" (change)="updateForm('source', $any($event.target).value)">@for (source of sources; track source) { <option [value]="source">{{ source }}</option> }</select></div>
+          <div class="form-field"><label class="form-label">Owner</label><input class="form-input" [value]="form().owner||''" (input)="updateForm('owner', $any($event.target).value)" placeholder="Reception"></div>
+        </div>
+      </div>
+      <div class="modal__footer"><button class="btn btn--secondary btn--sm" (click)="closeNew()">Cancel</button><button class="btn btn--primary btn--sm" (click)="saveApplication()">Save Enquiry</button></div>
+    </div>
+  </div>
+}
+
+@if (showImportModal()) {
+  <div class="modal-backdrop" (click)="closeImport()">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+      <div class="modal__header"><span class="modal__title">Import Leads</span><button class="modal__close" (click)="closeImport()">×</button></div>
+      <div class="modal__body">
+        <p class="import-note">Excel import placeholder is wired for UI testing. Click import to add a sample campaign lead to the pipeline.</p>
+      </div>
+      <div class="modal__footer"><button class="btn btn--secondary btn--sm" (click)="closeImport()">Cancel</button><button class="btn btn--primary btn--sm" (click)="importSample()">Import Sample</button></div>
+    </div>
+  </div>
+}

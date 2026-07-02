@@ -1,1 +1,450 @@
-<p>students works!</p>
+<div class="page" (click)="closeMenus()">
+
+  <!-- Header -->
+  <div class="page__header">
+    <div class="page__header-left">
+      <div class="page__breadcrumb">
+        <span>Home</span>
+        <span class="page__breadcrumb-sep">/</span>
+        <span class="page__breadcrumb-current">Students</span>
+      </div>
+      <h1 class="page__title">Students</h1>
+      <p class="page__subtitle">Manage all enrolled students, records and profiles</p>
+    </div>
+    <div class="page__header-actions">
+      <button class="btn btn--secondary btn--sm">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export</span>
+      </button>
+      <button class="btn btn--primary btn--sm" (click)="openAdd(); $event.stopPropagation()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>Add Student</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="page__stats">
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <div class="stat-card__icon" style="background:rgba(36,99,233,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2463E9" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <span class="stat-card__change stat-card__change--up">↑ 4%</span>
+      </div>
+      <div class="stat-card__value">{{ stats().total }}</div>
+      <div class="stat-card__label">Total Students</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <div class="stat-card__icon" style="background:rgba(26,190,23,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1ABE17" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <span class="stat-card__change stat-card__change--up">↑ 2%</span>
+      </div>
+      <div class="stat-card__value">{{ stats().present }}</div>
+      <div class="stat-card__label">Good Attendance (≥75%)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <div class="stat-card__icon" style="background:rgba(247,175,39,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F7AF27" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <span class="stat-card__change stat-card__change--down">↑ 1%</span>
+      </div>
+      <div class="stat-card__value">{{ stats().pending }}</div>
+      <div class="stat-card__label">Fee Pending / Overdue</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card__top">
+        <div class="stat-card__icon" style="background:rgba(124,58,237,.1)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        </div>
+        <span class="stat-card__change stat-card__change--neutral">This month</span>
+      </div>
+      <div class="stat-card__value">{{ stats().newAdmissions }}</div>
+      <div class="stat-card__label">New Admissions</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="page__toolbar">
+    <div class="search-bar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search by name, roll no, parent…" [value]="searchQuery()" (input)="onSearch($any($event.target).value)">
+    </div>
+    <select class="filter-select" [value]="classFilter()" (change)="onClassFilter($any($event.target).value)">
+      <option value="">All Classes</option>
+      @for (c of classes; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+    <select class="filter-select" [value]="genderFilter()" (change)="onGenderFilter($any($event.target).value)">
+      <option value="">All Genders</option>
+      <option value="Male">Male</option>
+      <option value="Female">Female</option>
+    </select>
+    <select class="filter-select" [value]="feeFilter()" (change)="onFeeFilter($any($event.target).value)">
+      <option value="">All Fee Status</option>
+      <option value="Paid">Paid</option>
+      <option value="Pending">Pending</option>
+      <option value="Overdue">Overdue</option>
+    </select>
+    @if (bulkSelected().size > 0) {
+      <div class="bulk-bar">
+        <span>{{ bulkSelected().size }} selected</span>
+        <button class="btn btn--danger btn--sm" (click)="bulkSelected.set(emptySet)">Clear</button>
+      </div>
+    }
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-card__header">
+      <div>
+        <div class="table-card__title">Student Records</div>
+        <div class="table-card__meta">{{ filtered().length }} students found</div>
+      </div>
+    </div>
+
+    <!-- Loading skeletons -->
+    @if (loading()) {
+      @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="skeleton-row">
+          <div class="skeleton skeleton-avatar"></div>
+          <div style="flex:1;display:flex;gap:12px;align-items:center">
+            <div class="skeleton skeleton-line" style="width:140px"></div>
+            <div class="skeleton skeleton-line" style="width:80px"></div>
+            <div class="skeleton skeleton-line" style="width:60px"></div>
+          </div>
+        </div>
+      }
+    } @else if (filtered().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="empty-state__title">No students found</div>
+        <div class="empty-state__desc">Try adjusting your search or filters to find what you're looking for.</div>
+      </div>
+    } @else {
+      <!-- Desktop table -->
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>
+                <input type="checkbox" class="cb" [checked]="allChecked()" (change)="toggleAllBulk()">
+              </th>
+              <th>Student</th>
+              <th>Roll No</th>
+              <th>Class</th>
+              <th>Gender</th>
+              <th>Parent</th>
+              <th>Phone</th>
+              <th>Attendance</th>
+              <th>Fee Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of paginated(); track s.id) {
+              <tr (click)="openDrawer(s)" style="cursor:pointer">
+                <td (click)="$event.stopPropagation()">
+                  <input type="checkbox" class="cb" [checked]="bulkSelected().has(s.id)" (change)="toggleBulk(s.id)">
+                </td>
+                <td>
+                  <div class="cell-avatar">
+                    <div class="cell-avatar__img" [style.background]="s.avatarColor">{{ getInitials(s.name) }}</div>
+                    <div>
+                      <div class="cell-avatar__name">{{ s.name }}</div>
+                      <div class="cell-avatar__sub">{{ s.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td><span class="roll-no">{{ s.rollNo }}</span></td>
+                <td>{{ s.class }} – {{ s.section }}</td>
+                <td>
+                  <span class="badge" [class.badge--info]="s.gender==='Male'" [class.badge--purple]="s.gender==='Female'">
+                    {{ s.gender }}
+                  </span>
+                </td>
+                <td>{{ s.parentName }}</td>
+                <td class="text-secondary">{{ s.phone }}</td>
+                <td>
+                  <div class="attendance-cell">
+                    <div class="attendance-bar">
+                      <div class="attendance-bar__fill" [style.width.%]="s.attendancePct" [style.background]="getAttendanceColor(s.attendancePct)"></div>
+                    </div>
+                    <span class="attendance-pct" [style.color]="getAttendanceColor(s.attendancePct)">{{ s.attendancePct }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge"
+                    [class.badge--success]="s.feeStatus==='Paid'"
+                    [class.badge--warning]="s.feeStatus==='Pending'"
+                    [class.badge--danger]="s.feeStatus==='Overdue'">
+                    {{ s.feeStatus }}
+                  </span>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <div class="action-menu">
+                    <button class="action-menu__trigger" (click)="toggleMenu(s.id, $event)">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                    </button>
+                    @if (openMenuId() === s.id) {
+                      <div class="action-menu__dropdown">
+                        <button class="action-menu__item" (click)="openDrawer(s)">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          View Profile
+                        </button>
+                        <div class="action-menu__divider"></div>
+                        <button class="action-menu__item action-menu__item--danger" (click)="confirmDelete(s)">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                          Delete
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile cards -->
+      <div class="mobile-cards">
+        @for (s of paginated(); track s.id) {
+          <div class="mobile-card" (click)="openDrawer(s)">
+            <div class="mobile-card__top">
+              <div class="cell-avatar">
+                <div class="cell-avatar__img" [style.background]="s.avatarColor">{{ getInitials(s.name) }}</div>
+                <div>
+                  <div class="cell-avatar__name">{{ s.name }}</div>
+                  <div class="cell-avatar__sub">{{ s.rollNo }} · {{ s.class }}-{{ s.section }}</div>
+                </div>
+              </div>
+              <div class="mobile-card__badges">
+                <span class="badge"
+                  [class.badge--success]="s.feeStatus==='Paid'"
+                  [class.badge--warning]="s.feeStatus==='Pending'"
+                  [class.badge--danger]="s.feeStatus==='Overdue'">
+                  {{ s.feeStatus }}
+                </span>
+              </div>
+            </div>
+            <div class="mobile-card__row">
+              <span class="mobile-card__key">Parent</span>
+              <span class="mobile-card__val">{{ s.parentName }}</span>
+            </div>
+            <div class="mobile-card__row">
+              <span class="mobile-card__key">Attendance</span>
+              <span class="mobile-card__val" [style.color]="getAttendanceColor(s.attendancePct)">{{ s.attendancePct }}%</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination">
+        <span class="pagination__info">
+          Showing {{ (currentPage()-1)*pageSize + 1 }}–{{ currentPage()*pageSize > filtered().length ? filtered().length : currentPage()*pageSize }} of {{ filtered().length }}
+        </span>
+        <div class="pagination__controls">
+          <button class="pagination__btn" (click)="prevPage()" [disabled]="currentPage()===1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          @for (p of pageNumbers(); track $index) {
+            @if (p === '...') {
+              <span class="pagination__btn" style="border:none;cursor:default">…</span>
+            } @else {
+              <button class="pagination__btn" [class.pagination__btn--active]="p===currentPage()" (click)="goToPage(p)">{{ p }}</button>
+            }
+          }
+          <button class="pagination__btn" (click)="nextPage()" [disabled]="currentPage()===totalPages()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ── Add Student Modal ── -->
+@if (showAddModal()) {
+  <div class="modal-backdrop" (click)="closeAdd()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <span class="modal__title">Add New Student</span>
+        <button class="modal__close" (click)="closeAdd()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">Full Name <span>*</span></label>
+            <input class="form-input" type="text" placeholder="e.g. Aarav Mehta" [value]="form().name||''" (input)="updateForm('name', $any($event.target).value)">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" placeholder="student@school.edu" [value]="form().email||''" (input)="updateForm('email', $any($event.target).value)">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Date of Birth</label>
+            <input class="form-input" type="date" [value]="form().dob||''" (input)="updateForm('dob', $any($event.target).value)">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Gender</label>
+            <select class="form-select" [value]="form().gender||'Male'" (change)="updateForm('gender', $any($event.target).value)">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Class</label>
+            <select class="form-select" [value]="form().class||'Class 1'" (change)="updateForm('class', $any($event.target).value)">
+              @for (c of classes; track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Section</label>
+            <select class="form-select" [value]="form().section||'A'" (change)="updateForm('section', $any($event.target).value)">
+              @for (s of sections; track s) { <option [value]="s">{{ s }}</option> }
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Blood Group</label>
+            <select class="form-select" [value]="form().bloodGroup||'O+'" (change)="updateForm('bloodGroup', $any($event.target).value)">
+              @for (b of bloodGroups; track b) { <option [value]="b">{{ b }}</option> }
+            </select>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Phone</label>
+            <input class="form-input" type="tel" placeholder="98XXXXXXXX" [value]="form().phone||''" (input)="updateForm('phone', $any($event.target).value)">
+          </div>
+          <div class="form-field">
+            <label class="form-label">Parent / Guardian Name</label>
+            <input class="form-input" type="text" placeholder="Parent full name" [value]="form().parentName||''" (input)="updateForm('parentName', $any($event.target).value)">
+          </div>
+          <div class="form-field form-field--full">
+            <label class="form-label">Address</label>
+            <textarea class="form-textarea" placeholder="Full address…" [value]="form().address||''" (input)="updateForm('address', $any($event.target).value)"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" (click)="closeAdd()">Cancel</button>
+        <button class="btn btn--primary btn--sm" (click)="saveStudent()">Save Student</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Delete Confirm Modal ── -->
+@if (showDeleteConfirm()) {
+  <div class="modal-backdrop" (click)="showDeleteConfirm.set(false)">
+    <div class="modal modal--sm" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <span class="modal__title">Delete Student</span>
+        <button class="modal__close" (click)="showDeleteConfirm.set(false)">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <p style="font-size:14px;color:var(--color-text-secondary);line-height:1.7">
+          Are you sure you want to delete <strong style="color:var(--color-text)">{{ selectedStudent()?.name }}</strong>? This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal__footer">
+        <button class="btn btn--secondary btn--sm" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn btn--danger btn--sm" (click)="deleteStudent()">Delete</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ── Student Drawer ── -->
+@if (showDrawer()) {
+  <div class="drawer-backdrop" (click)="closeDrawer()"></div>
+  <div class="drawer">
+    <div class="drawer__header">
+      <span class="drawer__title">Student Profile</span>
+      <button class="modal__close" (click)="closeDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    @if (selectedStudent(); as s) {
+      <div class="drawer__body">
+        <!-- Avatar hero -->
+        <div class="drawer-hero">
+          <div class="drawer-hero__avatar" [style.background]="s.avatarColor">{{ getInitials(s.name) }}</div>
+          <div class="drawer-hero__info">
+            <div class="drawer-hero__name">{{ s.name }}</div>
+            <div class="drawer-hero__sub">{{ s.rollNo }} · {{ s.class }} – {{ s.section }}</div>
+            <div class="drawer-hero__badges">
+              <span class="badge badge--info">{{ s.gender }}</span>
+              <span class="badge"
+                [class.badge--success]="s.feeStatus==='Paid'"
+                [class.badge--warning]="s.feeStatus==='Pending'"
+                [class.badge--danger]="s.feeStatus==='Overdue'">
+                {{ s.feeStatus }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attendance meter -->
+        <div class="drawer-section">
+          <div class="drawer-section__label">Attendance</div>
+          <div class="drawer-att">
+            <div class="drawer-att__bar">
+              <div class="drawer-att__fill" [style.width.%]="s.attendancePct" [style.background]="getAttendanceColor(s.attendancePct)"></div>
+            </div>
+            <span class="drawer-att__pct" [style.color]="getAttendanceColor(s.attendancePct)">{{ s.attendancePct }}%</span>
+          </div>
+        </div>
+
+        <!-- Details grid -->
+        <div class="drawer-grid">
+          <div class="drawer-field">
+            <span class="drawer-field__key">Email</span>
+            <span class="drawer-field__val">{{ s.email }}</span>
+          </div>
+          <div class="drawer-field">
+            <span class="drawer-field__key">Phone</span>
+            <span class="drawer-field__val">{{ s.phone }}</span>
+          </div>
+          <div class="drawer-field">
+            <span class="drawer-field__key">Date of Birth</span>
+            <span class="drawer-field__val">{{ s.dob }}</span>
+          </div>
+          <div class="drawer-field">
+            <span class="drawer-field__key">Blood Group</span>
+            <span class="drawer-field__val">{{ s.bloodGroup }}</span>
+          </div>
+          <div class="drawer-field">
+            <span class="drawer-field__key">Parent / Guardian</span>
+            <span class="drawer-field__val">{{ s.parentName }}</span>
+          </div>
+          <div class="drawer-field">
+            <span class="drawer-field__key">Admission Date</span>
+            <span class="drawer-field__val">{{ s.admissionDate }}</span>
+          </div>
+          <div class="drawer-field drawer-field--full">
+            <span class="drawer-field__key">Address</span>
+            <span class="drawer-field__val">{{ s.address }}</span>
+          </div>
+        </div>
+
+        <div class="drawer-actions">
+          <button class="btn btn--danger btn--sm" style="width:100%" (click)="confirmDelete(s); closeDrawer()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+            Delete Student
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}

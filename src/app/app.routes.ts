@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { AdmissionsComponent } from './admissions/admissions.component';
 import { StudentsComponent } from './students/students.component';
 import { ParentsComponent } from './parents/parents.component';
 import { EmployeesComponent } from './employees/employees.component';
@@ -17,6 +18,7 @@ import { LoginComponent } from './login/login.component';
 export const routes: Routes = [
   { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'admissions', component: AdmissionsComponent },
   { path: 'students', component: StudentsComponent },
   { path: 'parents', component: ParentsComponent },
   { path: 'employees', component: EmployeesComponent },
