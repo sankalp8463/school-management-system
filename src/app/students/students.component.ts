@@ -1,12 +1,14 @@
 import { Component, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { inject } from '@angular/core';
+import { StudentService } from '../services/student.service';
 
 export interface Student {
-  id: number;
+  id?: string ;
   name: string;
-  rollNo: string;
-  class: string;
+  rollNo?: string;
+  className: string;
   section: string;
   gender: 'Male' | 'Female';
   dob: string;
@@ -20,6 +22,7 @@ export interface Student {
   bloodGroup: string;
   email: string;
 }
+
 
 const AVATAR_COLORS = [
   '#2463E9','#7C3AED','#1ABE17','#F97316','#EC4899','#F7AF27','#4F8EF7','#FF6550'
@@ -46,10 +49,10 @@ export class StudentsComponent implements OnInit {
   showDrawer    = signal(false);
   showDeleteConfirm = signal(false);
   selectedStudent   = signal<Student | null>(null);
-  openMenuId        = signal<number | null>(null);
-  bulkSelected      = signal<Set<number>>(new Set());
-  readonly emptySet  = new Set<number>();
-
+  openMenuId        = signal<string | null>(null);
+  bulkSelected      = signal<Set<string>>(new Set());
+  readonly emptySet  = new Set<string>();
+  private studentService = inject(StudentService);
   // ── Form model ──
   form = signal<Partial<Student>>({});
 
@@ -68,8 +71,8 @@ export class StudentsComponent implements OnInit {
     const gen = this.genderFilter();
     const fee = this.feeFilter();
     return this.students().filter(s => {
-      const matchQ   = !q   || s.name.toLowerCase().includes(q) || s.rollNo.toLowerCase().includes(q) || s.parentName.toLowerCase().includes(q);
-      const matchCls = !cls || s.class === cls;
+      const matchQ   = !q   || s.name.toLowerCase().includes(q) || s.rollNo?.toString().toLowerCase().includes(q) || s.parentName.toLowerCase().includes(q);
+      const matchCls = !cls || s.className === cls;
       const matchGen = !gen || s.gender === gen;
       const matchFee = !fee || s.feeStatus === fee;
       return matchQ && matchCls && matchGen && matchFee;
@@ -114,16 +117,38 @@ export class StudentsComponent implements OnInit {
   });
 
   allChecked = computed(() => {
-    const ids = this.paginated().map(s => s.id);
+    const ids = this.paginated().map(s => s.id).filter((id): id is string => typeof id === 'string');
     return ids.length > 0 && ids.every(id => this.bulkSelected().has(id));
   });
 
   ngOnInit() {
-    this.allStudents = this.generateStudents(47);
-    this.students.set(this.allStudents);
-    setTimeout(() => this.loading.set(false), 800);
+    this.loadStudents();
   }
+loadStudents() {
 
+  this.loading.set(true);
+
+  this.studentService.getAll().subscribe({
+
+    next: (res) => {
+
+      this.students.set(res.data);
+
+      this.loading.set(false);
+
+    },
+
+    error: (err) => {
+
+      console.error(err);
+
+      this.loading.set(false);
+
+    }
+
+  });
+
+}
   // ── Actions ──
   onSearch(val: string)      { this.searchQuery.set(val);  this.currentPage.set(1); }
   onClassFilter(val: string) { this.classFilter.set(val);  this.currentPage.set(1); }
@@ -134,7 +159,7 @@ export class StudentsComponent implements OnInit {
   nextPage() { if (this.currentPage() < this.totalPages()) this.currentPage.update(p => p + 1); }
 
   openAdd() {
-    this.form.set({ gender: 'Male', class: 'Class 1', section: 'A', bloodGroup: 'O+' });
+    this.form.set({ gender: 'Male', className: 'Class 1', section: 'A', bloodGroup: 'O+' });
     this.showAddModal.set(true);
   }
   closeAdd()  { this.showAddModal.set(false); }
@@ -151,44 +176,118 @@ export class StudentsComponent implements OnInit {
     this.showDeleteConfirm.set(true);
     this.openMenuId.set(null);
   }
-  deleteStudent() {
-    const id = this.selectedStudent()?.id;
-    if (id) this.students.update(list => list.filter(s => s.id !== id));
-    this.showDeleteConfirm.set(false);
-    this.selectedStudent.set(null);
-  }
+  editStudent(id: string) {
+
+  this.studentService.getById(id).subscribe({
+
+    next: (res) => {
+
+      this.form.set({
+
+        name: res.data.name,
+        className: res.data.className,
+        section: res.data.section,
+        gender: res.data.gender,
+        dob: res.data.dob,
+        phone: res.data.phone,
+        parentName: res.data.parentName,
+        address: res.data.address,
+        bloodGroup: res.data.bloodGroup,
+        email: res.data.email
+
+      });
+
+      this.showAddModal.set(true);
+
+    },
+
+    error: console.error
+
+  });
+
+}
+ deleteStudent() {
+
+  const student = this.selectedStudent();
+
+  if (!student?.id) return;
+
+  this.studentService.delete(student.id.toString()).subscribe({
+
+    next: () => {
+
+      this.loadStudents();
+
+      this.showDeleteConfirm.set(false);
+
+    },
+
+    error: console.error
+
+  });
+
+}
 
   saveStudent() {
-    const f = this.form();
-    if (!f.name?.trim()) return;
-    const newStudent: Student = {
-      id: Date.now(),
-      name: f.name!,
-      rollNo: `STU${String(this.students().length + 1).padStart(4,'0')}`,
-      class: f.class || 'Class 1',
-      section: f.section || 'A',
-      gender: f.gender as 'Male' | 'Female' || 'Male',
-      dob: f.dob || '2010-01-01',
-      phone: f.phone || '',
-      parentName: f.parentName || '',
-      address: f.address || '',
-      feeStatus: 'Pending',
-      attendancePct: 100,
-      admissionDate: new Date().toISOString().split('T')[0],
-      avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)],
-      bloodGroup: f.bloodGroup || 'O+',
-      email: f.email || '',
-    };
-    this.students.update(list => [newStudent, ...list]);
-    this.showAddModal.set(false);
-  }
 
-  toggleMenu(id: number, e: Event) {
+  const f = this.form();
+
+  if (!f.name?.trim()) return;
+
+  const payload = {
+
+    name: f.name,
+
+    className: f.className,
+
+    section: f.section,
+
+    gender: f.gender,
+
+    dob: f.dob ? new Date(f.dob).toISOString() : undefined,
+
+    phone: f.phone,
+
+    parentName: f.parentName,
+
+    address: f.address,
+
+    feeStatus: "Pending",
+
+    attendancePct: 100,
+
+    admissionDate: new Date().toISOString(),
+
+    avatarColor: "#2463E9",
+
+    bloodGroup: f.bloodGroup,
+
+    email: f.email
+
+  };
+
+  this.studentService.create(payload as Student).subscribe({
+
+    next: () => {
+
+      this.showAddModal.set(false);
+
+      this.loadStudents();
+
+    },
+
+    error: console.error
+
+  });
+
+}
+
+  toggleMenu(id: string, e: Event) {
     e.stopPropagation();
     this.openMenuId.update(cur => cur === id ? null : id);
   }
 
-  toggleBulk(id: number) {
+  toggleBulk(id: string) {
     this.bulkSelected.update(set => {
       const next = new Set(set);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -197,7 +296,7 @@ export class StudentsComponent implements OnInit {
   }
 
   toggleAllBulk() {
-    const ids = this.paginated().map(s => s.id);
+    const ids = this.paginated().map(s => s.id).filter((id): id is string => id !== undefined);
     this.bulkSelected.update(set => {
       const next = new Set(set);
       if (this.allChecked()) { ids.forEach(id => next.delete(id)); }
@@ -221,27 +320,27 @@ export class StudentsComponent implements OnInit {
   }
 
   // ── Mock data generator ──
-  private generateStudents(count: number): Student[] {
-    const names = ['Aarav Mehta','Sneha Reddy','Rohan Gupta','Ananya Singh','Vivek Sharma','Priya Nair','Kiran Desai','Meena Joshi','Arjun Patel','Riya Sharma','Suresh Kumar','Divya Rao','Rahul Verma','Pooja Iyer','Amit Tiwari','Kavya Pillai','Nikhil Jain','Shreya Mishra','Aditya Nair','Tanvi Kulkarni','Siddharth Roy','Ishaan Kapoor','Nisha Pandey','Varun Malhotra','Deepa Shetty','Rajesh Yadav','Sunita Bose','Manish Dubey','Rekha Nambiar','Gaurav Saxena','Lakshmi Menon','Vijay Patil','Usha Krishnan','Harish Garg','Swati Agarwal','Pankaj Bhatt','Geeta Choudhary','Ramesh Pillai','Anjali Tiwari','Sunil Mehta','Nandini Rao','Kartik Sharma','Bhavna Joshi','Dinesh Patel','Leela Nair','Mohan Gupta','Chitra Reddy'];
-    const parents = ['Rajesh Mehta','Suresh Reddy','Anil Gupta','Pradeep Singh','Mahesh Sharma','Ravi Nair','Sunil Desai','Ramesh Joshi','Vijay Patel','Ashok Sharma'];
-    const feeStatuses: Student['feeStatus'][] = ['Paid','Paid','Paid','Pending','Overdue'];
-    return Array.from({ length: count }, (_, i) => ({
-      id: i + 1,
-      name: names[i % names.length],
-      rollNo: `STU${String(i + 1).padStart(4,'0')}`,
-      class: this.classes[i % this.classes.length],
-      section: this.sections[i % this.sections.length],
-      gender: i % 3 === 0 ? 'Female' : 'Male',
-      dob: `${2008 + (i % 8)}-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`,
-      phone: `98${String(10000000 + i * 1234567).slice(0,8)}`,
-      parentName: parents[i % parents.length],
-      address: `${i + 1}, Main Street, Pune`,
-      feeStatus: feeStatuses[i % feeStatuses.length],
-      attendancePct: 65 + (i % 36),
-      admissionDate: `2024-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`,
-      avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
-      bloodGroup: this.bloodGroups[i % this.bloodGroups.length],
-      email: `${names[i % names.length].split(' ')[0].toLowerCase()}${i}@school.edu`,
-    }));
-  }
+  // private generateStudents(count: number): Student[] {
+  //   const names = ['Aarav Mehta','Sneha Reddy','Rohan Gupta','Ananya Singh','Vivek Sharma','Priya Nair','Kiran Desai','Meena Joshi','Arjun Patel','Riya Sharma','Suresh Kumar','Divya Rao','Rahul Verma','Pooja Iyer','Amit Tiwari','Kavya Pillai','Nikhil Jain','Shreya Mishra','Aditya Nair','Tanvi Kulkarni','Siddharth Roy','Ishaan Kapoor','Nisha Pandey','Varun Malhotra','Deepa Shetty','Rajesh Yadav','Sunita Bose','Manish Dubey','Rekha Nambiar','Gaurav Saxena','Lakshmi Menon','Vijay Patil','Usha Krishnan','Harish Garg','Swati Agarwal','Pankaj Bhatt','Geeta Choudhary','Ramesh Pillai','Anjali Tiwari','Sunil Mehta','Nandini Rao','Kartik Sharma','Bhavna Joshi','Dinesh Patel','Leela Nair','Mohan Gupta','Chitra Reddy'];
+  //   const parents = ['Rajesh Mehta','Suresh Reddy','Anil Gupta','Pradeep Singh','Mahesh Sharma','Ravi Nair','Sunil Desai','Ramesh Joshi','Vijay Patel','Ashok Sharma'];
+  //   const feeStatuses: Student['feeStatus'][] = ['Paid','Paid','Paid','Pending','Overdue'];
+  //   return Array.from({ length: count }, (_, i) => ({
+  //     id: i + 1,
+  //     name: names[i % names.length],
+  //     rollNo: `STU${String(i + 1).padStart(4,'0')}`,
+  //     className: this.classes[i % this.classes.length],
+  //     section: this.sections[i % this.sections.length],
+  //     gender: i % 3 === 0 ? 'Female' : 'Male',
+  //     dob: `${2008 + (i % 8)}-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`,
+  //     phone: `98${String(10000000 + i * 1234567).slice(0,8)}`,
+  //     parentName: parents[i % parents.length],
+  //     address: `${i + 1}, Main Street, Pune`,
+  //     feeStatus: feeStatuses[i % feeStatuses.length],
+  //     attendancePct: 65 + (i % 36),
+  //     admissionDate: `2024-${String((i % 12) + 1).padStart(2,'0')}-${String((i % 28) + 1).padStart(2,'0')}`,
+  //     avatarColor: AVATAR_COLORS[i % AVATAR_COLORS.length],
+  //     bloodGroup: this.bloodGroups[i % this.bloodGroups.length],
+  //     email: `${names[i % names.length].split(' ')[0].toLowerCase()}${i}@school.edu`,
+  //   }));
+  // }
 }

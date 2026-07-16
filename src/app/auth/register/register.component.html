@@ -1,0 +1,192 @@
+<div class="login">
+
+  <!-- ══ Left Panel — Brand ══ -->
+  <div class="login__brand">
+    <div class="login__brand-glow login__brand-glow--1"></div>
+    <div class="login__brand-glow login__brand-glow--2"></div>
+
+    <div class="login__brand-content">
+      <!-- Logo -->
+      <div class="login__logo">
+        <div class="login__logo-mark">S</div>
+        <div class="login__logo-text">
+          <span class="login__logo-name">Sarvam</span>
+          <span class="login__logo-sub">School Management System</span>
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <div class="login__tagline">
+        <span class="login__tagline-primary">Learn.</span>
+        <span class="login__tagline-secondary">Teach.</span>
+        <span class="login__tagline-secondary">Manage.</span>
+        <span class="login__tagline-secondary">Grow.</span>
+      </div>
+
+      <!-- Year pill -->
+      <div class="login__year-pill">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Academic Year 2026–27
+      </div>
+
+      <!-- Stats pills -->
+      <div class="login__stats">
+        <div class="login__stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          2,847 Students
+        </div>
+        <div class="login__stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          89 Teachers
+        </div>
+        <div class="login__stat-pill">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="m9 16 2 2 4-4"/></svg>
+          94.2% Attendance
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Right Panel — Form ══ -->
+  <div class="login__form-panel">
+    <div class="login__form-wrap">
+
+      <!-- Mobile logo (hidden on desktop) -->
+      <div class="login__mobile-logo">
+        <div class="login__logo-mark login__logo-mark--sm">S</div>
+        <span class="login__logo-name">Sarvam</span>
+      </div>
+
+      <!-- Header -->
+      <div class="login__form-header">
+        <p class="login__form-eyebrow">Welcome back</p>
+        <h1 class="login__form-title">Sign in to Sarvam</h1>
+        <p class="login__form-meta">Academic Year 2026–27 · Sarvam School</p>
+      </div>
+
+      <!-- Form Card -->
+      <div class="login__card">
+
+        <!-- Role Selector -->
+        <div class="login__roles">
+          @for (role of roles; track role.key) {
+            <button
+              class="login__role-btn"
+[class.login__role-btn--active]="selectedRole === role.key" (click)="selectRole(role.key)"
+              type="button">
+              {{ role.label }}
+            </button>
+          }
+        </div>
+
+<form [formGroup]="registerForm" (ngSubmit)="register()">
+
+  <!-- Name Row -->
+  <div class="login__row">
+
+    <div class="login__field">
+      <label class="login__label">First Name</label>
+      <div class="login__input-wrap">
+        <input
+          class="login__input"
+          formControlName="firstName"
+          placeholder="Rahul">
+      </div>
+    </div>
+
+    <div class="login__field">
+      <label class="login__label">Middle Name</label>
+      <div class="login__input-wrap">
+        <input
+          class="login__input"
+          formControlName="middleName"
+          placeholder="Kumar">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="login__field">
+      <label class="login__label">Last Name</label>
+      <div class="login__input-wrap">
+          <input
+            class="login__input"
+            formControlName="lastName"
+            placeholder="Sharma">
+      </div>
+  </div>
+
+  <div class="login__field">
+      <label>Email</label>
+
+      <div class="login__input-wrap">
+          <input
+              class="login__input"
+              formControlName="email"
+              placeholder="rahul@gmail.com">
+      </div>
+  </div>
+
+  <div class="login__field">
+      <label>Phone</label>
+
+      <div class="login__input-wrap">
+          <input
+              class="login__input"
+              formControlName="phone"
+              placeholder="+919876543210">
+      </div>
+  </div>
+
+  <div class="login__field">
+      <label>Admission Number</label>
+
+      <div class="login__input-wrap">
+          <input
+              class="login__input"
+              formControlName="admissionNumber"
+              placeholder="STD20260001">
+      </div>
+  </div>
+
+  <div class="login__field">
+      <label>Password</label>
+
+      <div class="login__input-wrap">
+          <input
+            class="login__input"
+            [type]="hidePassword ? 'password':'text'"
+            formControlName="password">
+      </div>
+  </div>
+
+  <div class="login__field">
+      <label>Confirm Password</label>
+
+      <div class="login__input-wrap">
+          <input
+            class="login__input"
+            [type]="hideConfirmPassword ? 'password':'text'"
+            formControlName="confirmPassword">
+      </div>
+  </div>
+
+  <button
+      class="login__submit"
+      type="submit">
+
+      Create Account
+
+  </button>
+
+</form>
+ </div>
+
+      <!-- Footer -->
+      <p class="login__help">Having trouble? <a routerLink="/login">Already have an account?</a></p>
+      <p class="login__version">Sarvam v2.1.0 · © 2026 Sarvam ERP</p>
+
+    </div>
+  </div>
+
+</div>

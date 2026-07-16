@@ -1,10 +1,12 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { AdmissionService } from '../services/admission.service';
 
 type AdmissionStage = 'Enquiry' | 'Counselling' | 'Documents' | 'Approved' | 'Rejected';
 
 interface AdmissionApplication {
-  id: number;
+  id: string;
   applicant: string;
   className: string;
   parent: string;
@@ -21,30 +23,35 @@ const STAGES: AdmissionStage[] = ['Enquiry', 'Counselling', 'Documents', 'Approv
 @Component({
   selector: 'app-admissions',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admissions.component.html',
   styleUrl: './admissions.component.css'
 })
-export class AdmissionsComponent {
+export class AdmissionsComponent implements OnInit {
+  private admissionService = inject(AdmissionService);
   searchQuery = signal('');
   stageFilter = signal('');
   sourceFilter = signal('');
   showNewModal = signal(false);
   showImportModal = signal(false);
-  openMenuId = signal<number | null>(null);
+  openMenuId = signal<string | null>(null);
   toast = signal('');
-  form = signal<Partial<AdmissionApplication>>({ source: 'Website', stage: 'Enquiry', className: 'Class 1' });
-
+form: Partial<AdmissionApplication> = {
+  applicant: '',
+  className: 'Class 1',
+  parent: '',
+  phone: '',
+  source: 'Website',
+  stage: 'Enquiry',
+  owner: 'Reception',
+  score: 60
+};
   readonly stages = STAGES;
   readonly sources = SOURCES;
   readonly classes = ['Class 1','Class 2','Class 3','Class 4','Class 5','Class 6','Class 7','Class 8','Class 9','Class 10','Class 11','Class 12'];
 
   applications = signal<AdmissionApplication[]>([
-    { id: 1, applicant: 'Riya Shah', className: 'Class 6', parent: 'Neha Shah', phone: '9812345670', source: 'Website', stage: 'Counselling', owner: 'Reception', score: 72 },
-    { id: 2, applicant: 'Kabir Rao', className: 'Class 9', parent: 'Meera Rao', phone: '9898765432', source: 'Referral', stage: 'Documents', owner: 'Office Staff', score: 84 },
-    { id: 3, applicant: 'Aanya Desai', className: 'Class 1', parent: 'Vikram Desai', phone: '9765432109', source: 'Walk-in', stage: 'Approved', owner: 'Principal', score: 92 },
-    { id: 4, applicant: 'Vivaan Joshi', className: 'Class 4', parent: 'Anjali Joshi', phone: '9822011220', source: 'Campaign', stage: 'Enquiry', owner: 'Reception', score: 58 },
-    { id: 5, applicant: 'Sara Khan', className: 'Class 11', parent: 'Aamir Khan', phone: '9888011220', source: 'Website', stage: 'Documents', owner: 'Office Staff', score: 79 }
+
   ]);
 
   filtered = computed(() => {
@@ -69,42 +76,85 @@ export class AdmissionsComponent {
       conversion: all.length ? Math.round((approved / all.length) * 100) : 0
     };
   });
+  ngOnInit() {
+  this.loadAdmissions();
 
+  }
+  loadAdmissions() {
+
+  this.admissionService.getAll().subscribe({
+
+    next: (res) => {
+
+      this.applications.set(res.data);
+
+    },
+
+    error: console.error
+
+  });
+
+}
   onSearch(value: string) { this.searchQuery.set(value); }
   onStageFilter(value: string) { this.stageFilter.set(value); }
   onSourceFilter(value: string) { this.sourceFilter.set(value); }
 
   openNew() {
-    this.form.set({ source: 'Website', stage: 'Enquiry', className: 'Class 1' });
-    this.showNewModal.set(true);
-  }
+
+  this.form = {
+    applicant: '',
+    className: 'Class 1',
+    parent: '',
+    phone: '',
+    source: 'Website',
+    stage: 'Enquiry',
+    owner: 'Reception',
+    score: 60
+  };
+
+  this.showNewModal.set(true);
+
+}
 
   closeNew() { this.showNewModal.set(false); }
   openImport() { this.showImportModal.set(true); }
   closeImport() { this.showImportModal.set(false); }
 
   saveApplication() {
-    const f = this.form();
-    if (!f.applicant?.trim() || !f.parent?.trim()) return;
-    const app: AdmissionApplication = {
-      id: Date.now(),
-      applicant: f.applicant,
-      className: f.className || 'Class 1',
-      parent: f.parent,
-      phone: f.phone || '',
-      source: f.source as AdmissionApplication['source'] || 'Website',
-      stage: f.stage as AdmissionStage || 'Enquiry',
-      owner: f.owner || 'Reception',
-      score: Number(f.score) || 60
-    };
-    this.applications.update(list => [app, ...list]);
-    this.closeNew();
-    this.flash('New admission enquiry added');
+    console.log(this.form);
+
+  const f = this.form;
+
+  if (!f.applicant || !f.parent) {
+    return;
+  }
+
+  this.admissionService.create(f as any).subscribe({
+
+    next: (res) => {
+
+
+      this.loadAdmissions();
+      this.closeNew();
+
+      this.flash('Admission created successfully');
+
+    },
+
+    error: (err) => {
+
+      console.error(err);
+
+      alert(err.error?.message);
+
+    }
+
+  });
   }
 
   importSample() {
     this.applications.update(list => [
-      { id: Date.now(), applicant: 'Imported Lead', className: 'Class 3', parent: 'Parent Name', phone: '9800000000', source: 'Campaign', stage: 'Enquiry', owner: 'Reception', score: 50 },
+      { id: Date.now().toString(), applicant: 'Imported Lead', className: 'Class 3', parent: 'Parent Name', phone: '9800000000', source: 'Campaign', stage: 'Enquiry', owner: 'Reception', score: 50 },
       ...list
     ]);
     this.closeImport();
@@ -117,28 +167,38 @@ export class AdmissionsComponent {
     this.updateStage(app.id, nextStage);
   }
 
-  updateStage(id: number, stage: AdmissionStage) {
-    this.applications.update(list => list.map(app => app.id === id ? { ...app, stage } : app));
+  updateStage(id: string, stage: AdmissionStage) {
     this.openMenuId.set(null);
     this.flash(`Stage updated to ${stage}`);
   }
 
-  deleteApplication(id: number) {
-    this.applications.update(list => list.filter(app => app.id !== id));
-    this.openMenuId.set(null);
-    this.flash('Admission record removed');
+  deleteApplication(id: string) {
+
+  this.admissionService.delete(id).subscribe({
+
+    next: () => {
+
+      this.loadAdmissions();
+     
+
+      this.flash('Deleted Successfully');
+
+    },
+
+    error: console.error
+
+  });
+
   }
 
-  toggleMenu(id: number, event: Event) {
+  toggleMenu(id: string, event: Event) {
     event.stopPropagation();
     this.openMenuId.update(current => current === id ? null : id);
   }
 
   closeMenus() { this.openMenuId.set(null); }
 
-  updateForm(field: keyof AdmissionApplication, value: string) {
-    this.form.update(form => ({ ...form, [field]: value }));
-  }
+
 
   getStageClass(stage: AdmissionStage) {
     if (stage === 'Approved') return 'badge--success';

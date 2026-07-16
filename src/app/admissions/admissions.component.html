@@ -57,8 +57,9 @@
                   <div class="action-menu">
                     <button class="action-menu__trigger" (click)="toggleMenu(app.id, $event)">•••</button>
                     @if (openMenuId() === app.id) {
-                      <div class="action-menu__dropdown">
+                      <div class="action-menu__dropdown" (click)="$event.stopPropagation()">
                         <button class="action-menu__item" (click)="advance(app)">Move Next Stage</button>
+
                         <button class="action-menu__item" (click)="updateStage(app.id, 'Approved')">Approve</button>
                         <button class="action-menu__item" (click)="updateStage(app.id, 'Rejected')">Reject</button>
                         <div class="action-menu__divider"></div>
@@ -101,21 +102,122 @@
 
 @if (showNewModal()) {
   <div class="modal-backdrop" (click)="closeNew()">
-    <div class="modal modal--lg" (click)="$event.stopPropagation()">
-      <div class="modal__header"><span class="modal__title">New Admission Enquiry</span><button class="modal__close" (click)="closeNew()">×</button></div>
-      <div class="modal__body">
-        <div class="form-grid">
-          <div class="form-field"><label class="form-label">Applicant Name <span>*</span></label><input class="form-input" [value]="form().applicant||''" (input)="updateForm('applicant', $any($event.target).value)" placeholder="Student full name"></div>
-          <div class="form-field"><label class="form-label">Class</label><select class="form-select" [value]="form().className||'Class 1'" (change)="updateForm('className', $any($event.target).value)">@for (className of classes; track className) { <option [value]="className">{{ className }}</option> }</select></div>
-          <div class="form-field"><label class="form-label">Parent Name <span>*</span></label><input class="form-input" [value]="form().parent||''" (input)="updateForm('parent', $any($event.target).value)" placeholder="Parent / guardian"></div>
-          <div class="form-field"><label class="form-label">Phone</label><input class="form-input" [value]="form().phone||''" (input)="updateForm('phone', $any($event.target).value)" placeholder="98XXXXXXXX"></div>
-          <div class="form-field"><label class="form-label">Source</label><select class="form-select" [value]="form().source||'Website'" (change)="updateForm('source', $any($event.target).value)">@for (source of sources; track source) { <option [value]="source">{{ source }}</option> }</select></div>
-          <div class="form-field"><label class="form-label">Owner</label><input class="form-input" [value]="form().owner||''" (input)="updateForm('owner', $any($event.target).value)" placeholder="Reception"></div>
-        </div>
-      </div>
-      <div class="modal__footer"><button class="btn btn--secondary btn--sm" (click)="closeNew()">Cancel</button><button class="btn btn--primary btn--sm" (click)="saveApplication()">Save Enquiry</button></div>
+  <div class="modal modal--lg" (click)="$event.stopPropagation()">
+
+    <div class="modal__header">
+      <span class="modal__title">New Admission Enquiry</span>
+      <button class="modal__close" (click)="closeNew()">×</button>
     </div>
+
+    <div class="modal__body">
+
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label class="form-label">
+            Applicant Name <span>*</span>
+          </label>
+          <input
+            class="form-input"
+            [(ngModel)]="form.applicant"
+            name="applicant"
+            placeholder="Student full name">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">
+            Class
+          </label>
+
+          <select
+            class="form-select"
+            [(ngModel)]="form.className"
+            name="className">
+
+            @for (className of classes; track className) {
+              <option [value]="className">
+                {{ className }}
+              </option>
+            }
+
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">
+            Parent Name <span>*</span>
+          </label>
+
+          <input
+            class="form-input"
+            [(ngModel)]="form.parent"
+            name="parent"
+            placeholder="Parent / guardian">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">
+            Phone
+          </label>
+
+          <input
+            class="form-input"
+            [(ngModel)]="form.phone"
+            name="phone"
+            placeholder="9876543210">
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">
+            Source
+          </label>
+
+          <select
+            class="form-select"
+            [(ngModel)]="form.source"
+            name="source">
+
+            @for (source of sources; track source) {
+              <option [value]="source">
+                {{ source }}
+              </option>
+            }
+
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">
+            Owner
+          </label>
+
+          <input
+            class="form-input"
+            [(ngModel)]="form.owner"
+            name="owner"
+            placeholder="Reception">
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="modal__footer">
+      <button
+        class="btn btn--secondary btn--sm"
+        (click)="closeNew()">
+        Cancel
+      </button>
+
+      <button
+        class="btn btn--primary btn--sm"
+        (click)="saveApplication()">
+        Save Enquiry
+      </button>
+    </div>
+
   </div>
+</div>
 }
 
 @if (showImportModal()) {

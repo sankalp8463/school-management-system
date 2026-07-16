@@ -13,11 +13,14 @@ import { ResultsComponent } from './results/results.component';
 import { FeesComponent } from './fees/fees.component';
 import { TransportComponent } from './transport/transport.component';
 import { SettingsComponent } from './settings/settings.component';
-import { LoginComponent } from './login/login.component';
+import { LoginComponent } from './auth/login/login.component';
+import { HomeComponent } from './home/home.component';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: '', component: HomeComponent,canActivate: [authGuard],
+    canActivateChild: [authGuard], children: [
+    { path: 'dashboard', component: DashboardComponent },
   { path: 'admissions', component: AdmissionsComponent },
   { path: 'students', component: StudentsComponent },
   { path: 'parents', component: ParentsComponent },
@@ -31,5 +34,8 @@ export const routes: Routes = [
   { path: 'fees', component: FeesComponent },
   { path: 'transport', component: TransportComponent },
   { path: 'settings', component: SettingsComponent },
-  { path: 'login', component: LoginComponent }
+  ] },
+
+  { path: 'login', component: LoginComponent },
+  {path:'register', loadComponent: () => import('./auth/register/register.component').then(m => m.RegisterComponent)},
 ];

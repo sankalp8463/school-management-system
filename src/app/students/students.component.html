@@ -151,7 +151,7 @@
             @for (s of paginated(); track s.id) {
               <tr (click)="openDrawer(s)" style="cursor:pointer">
                 <td (click)="$event.stopPropagation()">
-                  <input type="checkbox" class="cb" [checked]="bulkSelected().has(s.id)" (change)="toggleBulk(s.id)">
+                  <input type="checkbox" class="cb" [checked]="bulkSelected().has(s.id!)" (change)="toggleBulk(s.id!)">
                 </td>
                 <td>
                   <div class="cell-avatar">
@@ -163,7 +163,7 @@
                   </div>
                 </td>
                 <td><span class="roll-no">{{ s.rollNo }}</span></td>
-                <td>{{ s.class }} – {{ s.section }}</td>
+                <td>{{ s.className }} – {{ s.section }}</td>
                 <td>
                   <span class="badge" [class.badge--info]="s.gender==='Male'" [class.badge--purple]="s.gender==='Female'">
                     {{ s.gender }}
@@ -189,10 +189,10 @@
                 </td>
                 <td (click)="$event.stopPropagation()">
                   <div class="action-menu">
-                    <button class="action-menu__trigger" (click)="toggleMenu(s.id, $event)">
+                    <button class="action-menu__trigger" (click)="toggleMenu(s.id!, $event)">
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
                     </button>
-                    @if (openMenuId() === s.id) {
+                    @if (openMenuId() === s.id!) {
                       <div class="action-menu__dropdown">
                         <button class="action-menu__item" (click)="openDrawer(s)">
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -222,7 +222,7 @@
                 <div class="cell-avatar__img" [style.background]="s.avatarColor">{{ getInitials(s.name) }}</div>
                 <div>
                   <div class="cell-avatar__name">{{ s.name }}</div>
-                  <div class="cell-avatar__sub">{{ s.rollNo }} · {{ s.class }}-{{ s.section }}</div>
+                  <div class="cell-avatar__sub">{{ s.rollNo }} · {{ s.className }}-{{ s.section }}</div>
                 </div>
               </div>
               <div class="mobile-card__badges">
@@ -304,7 +304,7 @@
           </div>
           <div class="form-field">
             <label class="form-label">Class</label>
-            <select class="form-select" [value]="form().class||'Class 1'" (change)="updateForm('class', $any($event.target).value)">
+            <select class="form-select" [value]="form().className||'Class 1'" (change)="updateForm('className', $any($event.target).value)">
               @for (c of classes; track c) { <option [value]="c">{{ c }}</option> }
             </select>
           </div>
@@ -382,7 +382,7 @@
           <div class="drawer-hero__avatar" [style.background]="s.avatarColor">{{ getInitials(s.name) }}</div>
           <div class="drawer-hero__info">
             <div class="drawer-hero__name">{{ s.name }}</div>
-            <div class="drawer-hero__sub">{{ s.rollNo }} · {{ s.class }} – {{ s.section }}</div>
+            <div class="drawer-hero__sub">{{ s.rollNo }} · {{ s.className }} – {{ s.section }}</div>
             <div class="drawer-hero__badges">
               <span class="badge badge--info">{{ s.gender }}</span>
               <span class="badge"
